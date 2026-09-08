@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi mapa mental — Orbit</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+
+    <link rel="stylesheet" href="../css/orbit.css">
+    <link rel="stylesheet" href="../css/componentes.css">
+    <link rel="stylesheet" href="../css/vistas.css">
+</head>
+<body>
+<div class="layout-principal">
+
+    <!-- ═══════════ SIDEBAR ═══════════ -->
+    <aside class="sidebar">
+        <div class="sidebar-logo">
+            <div class="logo-orbit"><i class="bi bi-circle-half"></i></div>
+            <span class="nombre-logo">orbit</span>
+        </div>
+
+        <nav class="sidebar-nav">
+            <button class="sidebar-item" onclick="location.href='tablero-kanban.html'">
+                <i class="bi bi-kanban"></i><span>Tablero</span>
+            </button>
+            <button class="sidebar-item" onclick="location.href='proyectos.html'">
+                <i class="bi bi-folder2-open"></i><span>Proyectos</span>
+            </button>
+            <button class="sidebar-item active" onclick="location.href='mapa-mental.html'">
+                <i class="bi bi-diagram-3"></i><span>Mapa mental</span>
+            </button>
+            <button class="sidebar-item" onclick="location.href='estadisticas.html'">
+                <i class="bi bi-bar-chart-line"></i><span>Estadísticas</span>
+            </button>
+        </nav>
+
+        <div class="sidebar-footer">
+            <div class="usuario-fila">
+                <div class="avatar" id="avatar-usuario">U</div>
+                <div class="view__inline--20">
+                    <div class="nombre-usuario-sidebar" id="nombre-usuario">Usuario</div>
+                </div>
+            </div>
+            <button class="btn-secondary" id="btn-cerrar-sesion"
+                    class="view__inline--21">
+                <i class="bi bi-box-arrow-left"></i><span>Cerrar sesión</span>
+            </button>
+        </div>
+    </aside>
+
+    <!-- Panel de herramientas verticales -->
+    <div class="panel-herramientas">
+        <button class="btn-herramienta activo" title="Selección"><i class="bi bi-cursor"></i></button>
+        <button class="btn-herramienta" id="herr-agregar" title="Agregar nodo"><i class="bi bi-plus-circle"></i></button>
+        <button class="btn-herramienta" id="herr-conectar" title="Conectar nodos"><i class="bi bi-share"></i></button>
+        <button class="btn-herramienta" id="herr-eliminar" title="Eliminar selección"><i class="bi bi-trash"></i></button>
+        <div class="view__inline--22"></div>
+        <button class="btn-herramienta" title="Deshacer"><i class="bi bi-arrow-counterclockwise"></i></button>
+        <button class="btn-herramienta" title="Rehacer"><i class="bi bi-arrow-clockwise"></i></button>
+    </div>
+
+    <!-- ═══════════ ZONA DEL MAPA ═══════════ -->
+    <div class="zona-contenido">
+
+        <!-- Topbar con controles de zoom -->
+        <header class="topbar">
+            <h1 class="topbar-titulo view__inline--23">Mi mapa mental</h1>
+
+            <div class="view__inline--24">
+                <button class="btn-zoom" id="zoom-menos"><i class="bi bi-dash"></i></button>
+                <span class="view__inline--25" id="texto-zoom">100%</span>
+                <button class="btn-zoom" id="zoom-mas"><i class="bi bi-plus"></i></button>
+                <button class="btn-zoom" id="zoom-reset" class="view__inline--26">
+                    Ajustar vista
+                </button>
+            </div>
+
+            <button class="btn-primary" id="btn-agregar-idea"
+                    class="view__inline--27">
+                <i class="bi bi-plus"></i> Agregar idea
+            </button>
+        </header>
+
+        <!-- Canvas SVG del mapa -->
+            <div class="mind-map__canvas" id="lienzo-mapa">
+            <!-- Estado vacío -->
+            <div class="mind-map__empty" id="estado-vacio">
+                <i class="bi bi-lightbulb view__inline--28"></i>
+                <h3 class="view__inline--29">
+                    Aún no tienes ideas en tu mapa
+                </h3>
+                <p class="view__inline--30">
+                    Haz clic en Agregar idea para comenzar
+                </p>
+                <button class="btn-primary" id="btn-primera-idea" class="view__inline--31">
+                    <i class="bi bi-plus"></i> Agregar mi primera idea
+                </button>
+            </div>
+
+            <svg class="mind-map__svg" id="svg-mapa" class="view__inline--32">
+                <defs>
+                    <pattern id="puntos" x="0" y="0" width="24" height="24" patternUnits="userSpaceOnUse">
+                        <circle cx="12" cy="12" r="1" fill="rgba(100,116,139,0.2)"/>
+                    </pattern>
+                </defs>
+                <rect width="100%" height="100%" fill="url(#puntos)"/>
+                <g id="grupo-mapa"></g>
+            </svg>
+        </div>
+    </div>
+
+    <!-- Panel de propiedades del nodo seleccionado -->
+    <div class="panel-propiedades" id="panel-propiedades" class="view__inline--33">
+        <h4 class="view__inline--34">
+            Propiedades del nodo
+        </h4>
+
+        <div class="view__inline--35">
+            <label class="view__inline--36">Texto</label>
+            <textarea class="input-dark" id="prop-texto" rows="3" class="view__inline--37"></textarea>
+        </div>
+
+        <div class="view__inline--38">
+            <label class="view__inline--39">Color</label>
+            <div class="view__inline--40" id="prop-colores"></div>
+        </div>
+
+        <div class="view__inline--41">
+            <div>
+                <label class="view__inline--42">Pos X</label>
+                <div class="view__inline--43" id="prop-x">0</div>
+            </div>
+            <div>
+                <label class="view__inline--44">Pos Y</label>
+                <div class="view__inline--45" id="prop-y">0</div>
+            </div>
+        </div>
+
+        <button class="btn-primary" id="prop-convertir" class="view__inline--46">
+            <i class="bi bi-check2-square view__inline--47"></i>Convertir en tarea
+        </button>
+        <button class="btn-danger-soft" id="prop-eliminar">
+            <i class="bi bi-trash view__inline--48"></i>Eliminar nodo
+        </button>
+    </div>
+</div>
+
+<!-- Menú contextual (clic derecho sobre nodo) -->
+<div class="mind-map__context-menu" id="menu-contextual">
+    <button class="menu-opcion" data-accion="editar"><i class="bi bi-pencil"></i> Editar idea</button>
+    <button class="menu-opcion" data-accion="conectar"><i class="bi bi-share"></i> Conectar con otra idea</button>
+    <button class="menu-opcion destacado" data-accion="convertir"><i class="bi bi-check2-square"></i> Convertir en tarea</button>
+    <button class="menu-opcion" data-accion="color"><i class="bi bi-palette"></i> Cambiar color</button>
+    <button class="menu-opcion peligroso" data-accion="eliminar"><i class="bi bi-trash"></i> Eliminar idea</button>
+</div>
+
+<!-- Modal: Convertir idea en tarea (RF-MAP-06) -->
+<div class="modal-overlay" id="modal-convertir" class="view__inline--49">
+    <div class="glass-card-strong modal-card view__inline--50">
+        <h3 class="modal-titulo view__inline--51">Convertir idea en tarea</h3>
+        <p class="view__inline--52">
+            El título de la tarea será:
+            <strong class="view__inline--53" id="convertir-titulo-preview">""</strong>
+        </p>
+
+        <div class="view__inline--54">
+            <label class="etiqueta-form" for="convertir-descripcion">Descripción (opcional)</label>
+            <textarea class="input-dark" id="convertir-descripcion" rows="3"
+                      placeholder="Añade detalles..." class="view__inline--55"></textarea>
+        </div>
+
+        <div class="view__inline--56">
+            <label class="etiqueta-form" for="convertir-etiqueta">Etiqueta</label>
+            <select class="input-dark" id="convertir-etiqueta" class="view__inline--57">
+                <option value="Urgente">Urgente</option>
+                <option value="Personal">Personal</option>
+                <option value="Trabajo" selected>Trabajo</option>
+                <option value="Estudio">Estudio</option>
+                <option value="Hogar">Hogar</option>
+            </select>
+        </div>
+
+        <div class="view__inline--58">
+            <label class="etiqueta-form" for="convertir-fecha">Fecha límite (opcional)</label>
+            <input class="input-dark" type="date" id="convertir-fecha" class="view__inline--59">
+        </div>
+
+        <div class="modal-acciones">
+            <button class="btn-secondary" id="btn-cancelar-convertir">Cancelar</button>
+            <button class="btn-primary" id="btn-confirmar-convertir">Crear tarea</button>
+        </div>
+    </div>
+</div>
+
+<!-- Axios -->
+<script src="https://cdn.jsdelivr.net/npm/axios@1.6.8/dist/axios.min.js"></script>
+
+<script type="module">
+    import api from '../js/api.js';
+    import { obtenerUsuario, logout } from '../js/autenticacion.js';
+
+    const COLORES = ['#00E5FF', '#00C48C', '#F59E0B', '#FF4D4D', '#A78BFA', '#64748B'];
+    const COLORES_ETIQUETA = {
+        'Urgente': '#FF4D4D', 'Personal': '#A78BFA', 'Trabajo': '#00E5FF',
+        'Estudio': '#F59E0B', 'Hogar': '#00C48C'
+    };
+
+    // Estado del mapa
+    let nodos = [];
+    let conexiones = [];
+    let nodoSeleccionadoId = null;
+    let nodoArrastrandose = null;
+    let offsetArrastre = { x: 0, y: 0 };
+    let pan = { x: 0, y: 0 };
+    let haciendoPan = false;
+    let inicioPan = { x: 0, y: 0 };
+    let zoom = 100;
+    let modoConectar = false;
+    let nodoOrigenConexion = null;
+    let nodoParaConvertir = null;
+
+    const svg = document.getElementById('svg-mapa');
+    const grupoMapa = document.getElementById('grupo-mapa');
+    const menuContextual = document.getElementById('menu-contextual');
+    const escala = () => zoom / 100;
+
+    // Datos del usuario
+    const usuario = obtenerUsuario();
+    if (usuario) {
+        const iniciales = usuario.nombre_completo.split(' ').slice(0, 2).map(p => p[0]).join('').toUpperCase();
+        document.getElementById('avatar-usuario').textContent = iniciales;
+        document.getElementById('nombre-usuario').textContent = usuario.nombre_completo;
+    }
+
+    // ═══════════ CARGA DESDE LA API ═══════════
+    async function cargarMapa() {
+        try {
+            const respuesta = await api.get('/mapa-mental/');
+            nodos = respuesta.data.nodos || [];
+            conexiones = respuesta.data.conexiones || [];
+            renderizar();
+        } catch (error) {
+            console.error('Error al cargar el mapa:', error);
+        }
+    }
+
+    // ═══════════ RENDERIZADO SVG ═══════════
+    function renderizar() {
+        document.getElementById('estado-vacio').style.display = nodos.length ? 'none' : 'flex';
+        svg.style.display = nodos.length ? 'block' : 'none';
+        grupoMapa.innerHTML = '';
+        grupoMapa.setAttribute('transform', `translate(${pan.x},${pan.y}) scale(${escala()})`);
+
+        // Dibujar conexiones como curvas Bézier
+        conexiones.forEach(conexion => {
+            const origen = nodos.find(n => n.id === conexion.nodo_origen);
+            const destino = nodos.find(n => n.id === conexion.nodo_destino);
+            if (!origen || !destino) return;
+
+            const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            const mx = (origen.posicion_x + destino.posicion_x) / 2;
+            path.setAttribute('d',
+                `M${origen.posicion_x},${origen.posicion_y} ` +
+                `C${mx},${origen.posicion_y} ${mx},${destino.posicion_y} ` +
+                `${destino.posicion_x},${destino.posicion_y}`
+            );
+            path.setAttribute('stroke', 'rgba(0,229,255,0.35)');
+            path.setAttribute('stroke-width', '1.5');
+            path.setAttribute('fill', 'none');
+            grupoMapa.appendChild(path);
+        });
+
+        // Dibujar nodos
+        nodos.forEach(nodo => grupoMapa.appendChild(dibujarNodo(nodo)));
+    }
+
+    function dibujarNodo(nodo) {
+        const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+        g.classList.add('mind-node');
+        g.dataset.id = nodo.id;
+        g.setAttribute('transform', `translate(${nodo.posicion_x},${nodo.posicion_y})`);
+        const seleccionado = nodoSeleccionadoId === nodo.id;
+
+        // Rectángulo redondeado del nodo
+        const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+        rect.setAttribute('x', -70); rect.setAttribute('y', -25);
+        rect.setAttribute('width', 140); rect.setAttribute('height', 50);
+        rect.setAttribute('rx', 16); rect.setAttribute('ry', 16);
+        rect.setAttribute('fill', `${nodo.color}18`);
+        rect.setAttribute('stroke', seleccionado ? nodo.color : `${nodo.color}60`);
+        rect.setAttribute('stroke-width', seleccionado ? 2 : 1.5);
+        if (seleccionado) {
+            rect.style.filter = `drop-shadow(0 0 8px ${nodo.color}80)`;
+        }
+        if (nodo.convertido_en_tarea) {
+            rect.setAttribute('stroke-dasharray', '5,3');
+        }
+        g.appendChild(rect);
+
+        // Texto del nodo (recortado a 16 caracteres)
+        const texto = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        texto.setAttribute('x', 0); texto.setAttribute('y', 5);
+        texto.setAttribute('text-anchor', 'middle');
+        texto.setAttribute('fill', '#E2E8F0');
+        texto.setAttribute('font-size', 13);
+        texto.setAttribute('font-weight', 500);
+        texto.setAttribute('font-family', 'Plus Jakarta Sans, sans-serif');
+        texto.textContent = nodo.texto.length > 16 ? nodo.texto.slice(0, 16) + '…' : nodo.texto;
+        g.appendChild(texto);
+
+        // Insignia de check si ya fue convertido en tarea
+        if (nodo.convertido_en_tarea) {
+            const check = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+            check.setAttribute('transform', 'translate(56,-22)');
+            check.innerHTML =
+                '<circle r="9" fill="#00C48C" stroke="#0D2137" stroke-width="1.5"/>' +
+                '<text y="4" text-anchor="middle" fill="white" font-size="10">✓</text>';
+            g.appendChild(check);
+        }
+
+        // Manijas de esquina cuando está seleccionado
+        if (seleccionado) {
+            [[-70,-25],[70,-25],[-70,25],[70,25]].forEach(([hx, hy]) => {
+                const manija = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                manija.setAttribute('cx', hx); manija.setAttribute('cy', hy);
+                manija.setAttribute('r', 4);
+                manija.setAttribute('fill', nodo.color);
+                manija.setAttribute('stroke', '#0D2137');
+                manija.setAttribute('stroke-width', 1.5);
+                g.appendChild(manija);
+            });
+        }
+
+        // Eventos del nodo
+        g.addEventListener('mousedown', (e) => iniciarArrastre(e, nodo));
+        g.addEventListener('contextmenu', (e) => mostrarMenuContextual(e, nodo));
+        g.addEventListener('dblclick', () => editarTextoNodo(nodo));
+        g.addEventListener('click', () => manejarClicConexion(nodo));
+
+        return g;
+    }
+
+    // ═══════════ ARRASTRE DE NODOS ═══════════
+    function iniciarArrastre(e, nodo) {
+        e.stopPropagation();
+        nodoSeleccionadoId = nodo.id;
+        nodoArrastrandose = nodo.id;
+        offsetArrastre = {
+            x: e.clientX / escala() - pan.x - nodo.posicion_x,
+            y: e.clientY / escala() - pan.y - nodo.posicion_y
+        };
+        actualizarPanelPropiedades();
+        renderizar();
+    }
+
+    svg.addEventListener('mousemove', (e) => {
+        if (nodoArrastrandose) {
+            const nodo = nodos.find(n => n.id === nodoArrastrandose);
+            if (nodo) {
+                nodo.posicion_x = e.clientX / escala() - pan.x - offsetArrastre.x;
+                nodo.posicion_y = e.clientY / escala() - pan.y - offsetArrastre.y;
+                renderizar();
+                document.getElementById('prop-x').textContent = Math.round(nodo.posicion_x);
+                document.getElementById('prop-y').textContent = Math.round(nodo.posicion_y);
+            }
+        } else if (haciendoPan) {
+            pan = { x: e.clientX - inicioPan.x, y: e.clientY - inicioPan.y };
+            renderizar();
+        }
+    });
+
+    svg.addEventListener('mouseup', async () => {
+        if (nodoArrastrandose) {
+            // Persistir la posición final en MongoDB
+            const nodo = nodos.find(n => n.id === nodoArrastrandose);
+            if (nodo) {
+                try {
+                    await api.patch(`/mapa-mental/nodos/${nodo.id}/`, {
+                        posicion_x: nodo.posicion_x,
+                        posicion_y: nodo.posicion_y
+                    });
+                } catch (error) {
+                    console.error('Error al guardar posición:', error);
+                }
+            }
+        }
+        nodoArrastrandose = null;
+        haciendoPan = false;
+    });
+
+    // Pan del canvas al hacer clic en zona vacía
+    svg.addEventListener('mousedown', (e) => {
+        if (e.target.closest('.mind-node')) return;
+        nodoSeleccionadoId = null;
+        ocultarMenuContextual();
+        actualizarPanelPropiedades();
+        haciendoPan = true;
+        inicioPan = { x: e.clientX - pan.x, y: e.clientY - pan.y };
+        renderizar();
+    });
+
+    svg.addEventListener('contextmenu', (e) => e.preventDefault());
+
+    // ═══════════ MODO CONECTAR NODOS ═══════════
+    document.getElementById('herr-conectar').addEventListener('click', () => {
+        modoConectar = !modoConectar;
+        nodoOrigenConexion = null;
+        document.getElementById('herr-conectar').classList.toggle('activo', modoConectar);
+    });
+
+    async function manejarClicConexion(nodo) {
+        if (!modoConectar) return;
+
+        if (!nodoOrigenConexion) {
+            nodoOrigenConexion = nodo;
+            return;
+        }
+        if (nodoOrigenConexion.id === nodo.id) return;
+
+        try {
+            await api.post('/mapa-mental/conexiones/', {
+                nodo_origen: nodoOrigenConexion.id,
+                nodo_destino: nodo.id
+            });
+            await cargarMapa();
+        } catch (error) {
+            console.error('Error al crear conexión:', error);
+        }
+
+        nodoOrigenConexion = null;
+        modoConectar = false;
+        document.getElementById('herr-conectar').classList.remove('activo');
+    }
+
+    // ═══════════ CREAR / ELIMINAR NODOS ═══════════
+    async function agregarNodo() {
+        try {
+            const respuesta = await api.post('/mapa-mental/nodos/', {
+                texto: 'Nueva idea',
+                color: '#00E5FF',
+                posicion_x: Math.round(300 + Math.random() * 200),
+                posicion_y: Math.round(200 + Math.random() * 200)
+            });
+            nodos.push(respuesta.data);
+            nodoSeleccionadoId = respuesta.data.id;
+            renderizar();
+            actualizarPanelPropiedades();
+        } catch (error) {
+            console.error('Error al crear nodo:', error);
+        }
+    }
+
+    async function eliminarNodo(id) {
+        if (!confirm('¿Eliminar esta idea y sus conexiones?')) return;
+        try {
+            await api.delete(`/mapa-mental/nodos/${id}/`);
+            nodos = nodos.filter(n => n.id !== id);
+            conexiones = conexiones.filter(c =>
+                c.nodo_origen !== id && c.nodo_destino !== id
+            );
+            if (nodoSeleccionadoId === id) nodoSeleccionadoId = null;
+            ocultarMenuContextual();
+            renderizar();
+            actualizarPanelPropiedades();
+        } catch (error) {
+            console.error('Error al eliminar nodo:', error);
+        }
+    }
+
+    document.getElementById('herr-agregar').addEventListener('click', agregarNodo);
+    document.getElementById('btn-agregar-idea').addEventListener('click', agregarNodo);
+    document.getElementById('btn-primera-idea').addEventListener('click', agregarNodo);
+    document.getElementById('herr-eliminar').addEventListener('click', () => {
+        if (nodoSeleccionadoId) eliminarNodo(nodoSeleccionadoId);
+    });
+
+    // ═══════════ EDICIÓN DE TEXTO (doble clic) ═══════════
+    function editarTextoNodo(nodo) {
+        const nuevoTexto = prompt('Editar idea:', nodo.texto);
+        if (nuevoTexto === null || !nuevoTexto.trim()) return;
+        actualizarNodo(nodo.id, { texto: nuevoTexto.trim() });
+    }
+
+    async function actualizarNodo(id, datos) {
+        try {
+            await api.patch(`/mapa-mental/nodos/${id}/`, datos);
+            const nodo = nodos.find(n => n.id === id);
+            if (nodo) Object.assign(nodo, datos);
+            renderizar();
+            actualizarPanelPropiedades();
+        } catch (error) {
+            console.error('Error al actualizar nodo:', error);
+        }
+    }
+
+    // ═══════════ MENÚ CONTEXTUAL ═══════════
+    let nodoMenuActual = null;
+
+    function mostrarMenuContextual(e, nodo) {
+        e.preventDefault();
+        e.stopPropagation();
+        nodoMenuActual = nodo;
+        nodoSeleccionadoId = nodo.id;
+        menuContextual.style.left = `${e.clientX}px`;
+        menuContextual.style.top = `${e.clientY}px`;
+        menuContextual.style.display = 'block';
+        renderizar();
+    }
+
+    function ocultarMenuContextual() {
+        menuContextual.style.display = 'none';
+    }
+
+    document.addEventListener('click', (e) => {
+        if (!menuContextual.contains(e.target)) ocultarMenuContextual();
+    });
+
+    menuContextual.addEventListener('click', (e) => {
+        const accion = e.target.closest('[data-accion]')?.dataset.accion;
+        if (!accion || !nodoMenuActual) return;
+        ocultarMenuContextual();
+
+        switch (accion) {
+            case 'editar':
+                editarTextoNodo(nodoMenuActual);
+                break;
+            case 'conectar':
+                modoConectar = true;
+                nodoOrigenConexion = nodoMenuActual;
+                document.getElementById('herr-conectar').classList.add('activo');
+                break;
+            case 'convertir':
+                abrirModalConvertir(nodoMenuActual);
+                break;
+            case 'color': {
+                // Rotar al siguiente color de la paleta
+                const indice = COLORES.indexOf(nodoMenuActual.color);
+                const nuevoColor = COLORES[(indice + 1) % COLORES.length];
+                actualizarNodo(nodoMenuActual.id, { color: nuevoColor });
+                break;
+            }
+            case 'eliminar':
+                eliminarNodo(nodoMenuActual.id);
+                break;
+        }
+    });
+
+    // ═══════════ PANEL DE PROPIEDADES ═══════════
+    function actualizarPanelPropiedades() {
+        const panel = document.getElementById('panel-propiedades');
+        const nodo = nodos.find(n => n.id === nodoSeleccionadoId);
+
+        if (!nodo) {
+            panel.style.display = 'none';
+            return;
+        }
+
+        panel.style.display = 'block';
+        document.getElementById('prop-texto').value = nodo.texto;
+        document.getElementById('prop-x').textContent = Math.round(nodo.posicion_x);
+        document.getElementById('prop-y').textContent = Math.round(nodo.posicion_y);
+
+        // Botones de color
+        const contenedorColores = document.getElementById('prop-colores');
+        contenedorColores.innerHTML = '';
+        COLORES.forEach(color => {
+            const btn = document.createElement('button');
+            btn.style.cssText = `width: 24px; height: 24px; border-radius: 50%; background: ${color};
+                border: ${nodo.color === color ? '2px solid #E2E8F0' : '2px solid transparent'};
+                cursor: pointer; transition: transform 0.15s;`;
+            btn.addEventListener('mouseenter', () => btn.style.transform = 'scale(1.2)');
+            btn.addEventListener('mouseleave', () => btn.style.transform = 'scale(1)');
+            btn.addEventListener('click', () => actualizarNodo(nodo.id, { color }));
+            contenedorColores.appendChild(btn);
+        });
+    }
+
+    // Sincronizar cambios de texto desde el panel
+    document.getElementById('prop-texto').addEventListener('change', (e) => {
+        if (nodoSeleccionadoId && e.target.value.trim()) {
+            actualizarNodo(nodoSeleccionadoId, { texto: e.target.value.trim() });
+        }
+    });
+
+    document.getElementById('prop-eliminar').addEventListener('click', () => {
+        if (nodoSeleccionadoId) eliminarNodo(nodoSeleccionadoId);
+    });
+
+    // ═══════════ RF-MAP-06: CONVERTIR EN TAREA ═══════════
+    function abrirModalConvertir(nodo) {
+        if (nodo.convertido_en_tarea) {
+            alert('Esta idea ya fue convertida en tarea.');
+            return;
+        }
+        nodoParaConvertir = nodo;
+        document.getElementById('convertir-titulo-preview').textContent = `"${nodo.texto}"`;
+        document.getElementById('convertir-descripcion').value = '';
+        document.getElementById('convertir-etiqueta').value = 'Trabajo';
+        document.getElementById('convertir-fecha').value = '';
+        document.getElementById('modal-convertir').style.display = 'flex';
+    }
+
+    document.getElementById('btn-cancelar-convertir').addEventListener('click', () => {
+        document.getElementById('modal-convertir').style.display = 'none';
+    });
+
+    document.getElementById('btn-confirmar-convertir').addEventListener('click', async () => {
+        if (!nodoParaConvertir) return;
+
+        const etiqueta = document.getElementById('convertir-etiqueta').value;
+        const descripcion = document.getElementById('convertir-descripcion').value.trim();
+        const fecha = document.getElementById('convertir-fecha').value;
+
+        try {
+            // El backend crea la tarea y marca el nodo como convertido (RF-MAP-06)
+            await api.post(`/mapa-mental/nodos/${nodoParaConvertir.id}/convertir-tarea/`, {
+                descripcion,
+                etiqueta,
+                color_etiqueta: COLORES_ETIQUETA[etiqueta],
+                fecha_limite: fecha || null
+            });
+
+            document.getElementById('modal-convertir').style.display = 'none';
+            await cargarMapa();
+        } catch (error) {
+            console.error('Error al convertir:', error);
+        }
+    });
+
+    document.getElementById('prop-convertir').addEventListener('click', () => {
+        const nodo = nodos.find(n => n.id === nodoSeleccionadoId);
+        if (nodo) abrirModalConvertir(nodo);
+    });
+
+    // ═══════════ CONTROLES DE ZOOM ═══════════
+    function aplicarZoom(valor) {
+        zoom = Math.min(200, Math.max(40, valor));
+        document.getElementById('texto-zoom').textContent = `${zoom}%`;
+        renderizar();
+    }
+
+    document.getElementById('zoom-mas').addEventListener('click', () => aplicarZoom(zoom + 10));
+    document.getElementById('zoom-menos').addEventListener('click', () => aplicarZoom(zoom - 10));
+    document.getElementById('zoom-reset').addEventListener('click', () => {
+        pan = { x: 0, y: 0 };
+        aplicarZoom(100);
+    });
+
+    // ═══════════ CERRAR SESIÓN ═══════════
+    document.getElementById('btn-cerrar-sesion').addEventListener('click', logout);
+
+    // Carga inicial
+    cargarMapa();
+</script>
+</body>
+</html>
