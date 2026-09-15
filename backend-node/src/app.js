@@ -1,6 +1,7 @@
 /**
  * Configuracion principal de la aplicacion Express.
  */
+const path = require('path');
 const express = require('express');
 const cors = require('cors');
 const config = require('./config');
@@ -24,6 +25,10 @@ app.use(cors({
 
 app.use(express.json());
 
+// Servir el frontend estatico (despliegue en un solo servicio: API + sitio web).
+const FRONTEND_DIR = path.join(__dirname, '..', '..', 'frontend');
+app.use(express.static(FRONTEND_DIR));
+
 // Verificacion de reCAPTCHA global (se aplica a registro/login).
 app.use(verificarCaptchaRoute);
 
@@ -42,6 +47,11 @@ app.use('/api/proyectos', requerirAutenticacion, require('./routes/proyectos.rou
 
 // Ruta de salud
 app.get('/api/salud/', (req, res) => res.status(200).json({ estado: 'ok' }));
+
+// Cualquier ruta GET que no sea /api/ → index.html (frontend).
+app.get(/^\/(?!api\/).*/, (req, res) => {
+    res.sendFile(path.join(FRONTEND_DIR, 'index.html'));
+});
 
 // 404 para rutas no registradas
 app.use((req, res) => {
