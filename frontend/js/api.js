@@ -4,8 +4,13 @@
  * Manejo de errores de sesión expirada o ausente
  */
 
-// URL base del backend Node.js (Express)
-const API_BASE_URL = 'http://localhost:4000/api';
+// URL base del backend. En local usa localhost:4000.
+// En producción apunta a la URL del backend desplegado en Render.
+const HOSTNAME_PAGINA = window.location.hostname;
+const URL_BACKEND_PRODUCCION = 'https://orbito-backend.onrender.com/api'; // TODO: reemplazar por tu URL real
+const API_BASE_URL = (HOSTNAME_PAGINA === 'localhost' || HOSTNAME_PAGINA === '127.0.0.1')
+    ? 'http://localhost:4000/api'
+    : URL_BACKEND_PRODUCCION;
 
 /**
  * Resuelve la ruta hacia el login según la profundidad de la página actual.

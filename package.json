@@ -1,0 +1,21 @@
+{
+  "name": "orbit",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Orbit: backend Node.js + frontend estatico, ejecutados juntos con concurrently",
+  "scripts": {
+    "dev:server": "npm run dev --prefix backend-node",
+    "dev:frontend": "serve frontend -l 3000",
+    "dev": "concurrently -k -n server,frontend -c blue,green \"npm:dev:server\" \"npm:dev:frontend\"",
+    "server": "npm run start --prefix backend-node",
+    "frontend": "serve frontend -l 3000",
+    "start": "concurrently -k -n server,frontend -c blue,green \"npm:server\" \"npm:frontend\""
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.0",
+    "serve": "^14.2.4"
+  }
+}

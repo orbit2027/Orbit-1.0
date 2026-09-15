@@ -1,10 +1,10 @@
 {
   "name": "orbit-backend-node",
   "version": "1.0.0",
-  "description": "Backend Node.js (Express + Mongoose) para Orbit - puerto de la version Django/MongoEngine",
+  "description": "Backend Node.js (Express + Mongoose) para Orbit",
   "main": "src/server.js",
   "scripts": {
-    "start": "node src/server.js",
+    "start": "pm2 start src/server.js ",
     "dev": "node --watch src/server.js",
     "seed-admin": "node scripts/create-admin.js",
     "test": "node -e \"process.env.RECAPTCHA_SECRET_KEY=''; require('./scripts/test-api.js')\""
@@ -12,6 +12,9 @@
   "keywords": ["orbit", "express", "mongoose", "jwt", "mongodb"],
   "author": "Paulina Fernandez Hernandez",
   "license": "ISC",
+  "engines": {
+    "node": ">=18"
+  },
   "dependencies": {
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",

@@ -1,6 +1,5 @@
 /**
  * Crea o actualiza la cuenta de administrador inicial.
- * Equivalente a scripts/create_app_admin.py del backend Django.
  */
 const config = require('../src/config');
 const { conectarDB } = require('../src/config/db');
